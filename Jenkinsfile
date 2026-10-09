@@ -53,16 +53,21 @@ pipeline {
                     docker exec "$CONTAINER_NAME" python -c '
 import os
 import time
-from urllib.request import urlopen
+from http.client import HTTPConnection
 for attempt in range(20):
     try:
-        response = urlopen("http://127.0.0.1:8000/", timeout=2)
+        connection = HTTPConnection("127.0.0.1", 8000, timeout=2)
+        connection.request("GET", "/")
+        response = connection.getresponse()
         break
     except OSError:
+        connection.close()
         if attempt == 19:
             raise
         time.sleep(0.5)
+assert response.status == 200
 text = response.read().decode()
+connection.close()
 for label, variable in [("Name", "STUDENT_NAME"), ("Surname", "STUDENT_SURNAME"),
                         ("Group", "STUDENT_GROUP"), ("Student ID", "STUDENT_ID")]:
     assert label + ": " + os.environ[variable] in text
