@@ -28,6 +28,7 @@ class ApplicationTests(unittest.TestCase):
 
     def test_project_configuration(self):
         self.assertEqual(app_settings().getint("app", "port"), 8000)
+        self.assertIn("Course: DevOps", application_text())
 
     def test_http_response(self):
         with HTTPServer(("127.0.0.1", 0), StudentHandler) as server:

@@ -23,6 +23,7 @@ def application_text():
     lines = ["================================", "DevOps Student Application",
              "================================", ""]
     lines.extend(f"{key}: {value}" for key, value in student_info().items())
+    lines.append("Course: " + app_settings().get("app", "course", fallback="DevOps"))
     lines.extend(["", "Application is running successfully!"])
     return "\n".join(lines) + "\n"
 
