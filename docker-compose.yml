@@ -1,0 +1,12 @@
+services:
+  app:
+    build: .
+    image: kim-eduard-devops
+    container_name: kim-eduard-container
+    ports:
+      - "127.0.0.1:8000:8000"
+    environment:
+      STUDENT_NAME: "${STUDENT_NAME:-Eduard}"
+      STUDENT_SURNAME: "${STUDENT_SURNAME:-Kim}"
+      STUDENT_GROUP: "${STUDENT_GROUP:-IT2-2313}"
+      STUDENT_ID: "${STUDENT_ID:-37324}"
