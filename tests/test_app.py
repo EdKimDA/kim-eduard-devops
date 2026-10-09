@@ -1,10 +1,9 @@
 import os
 import threading
 import unittest
+from http.client import HTTPConnection
 from http.server import HTTPServer
 from unittest.mock import patch
-from urllib.error import HTTPError
-from urllib.request import urlopen
 
 from app.main import StudentHandler, application_text, app_settings, student_info
 
@@ -34,15 +33,19 @@ class ApplicationTests(unittest.TestCase):
         with HTTPServer(("127.0.0.1", 0), StudentHandler) as server:
             thread = threading.Thread(target=server.serve_forever, daemon=True)
             thread.start()
+            connection = HTTPConnection("127.0.0.1", server.server_port, timeout=3)
             try:
                 with patch.dict(os.environ, {}, clear=True):
-                    with urlopen(f"http://127.0.0.1:{server.server_port}/", timeout=3) as response:
-                        self.assertEqual(response.status, 200)
-                        self.assertEqual(response.read().decode(), application_text())
-                with self.assertRaises(HTTPError) as error:
-                    urlopen(f"http://127.0.0.1:{server.server_port}/missing", timeout=3)
-                self.assertEqual(error.exception.code, 404)
+                    connection.request("GET", "/")
+                    response = connection.getresponse()
+                    self.assertEqual(response.status, 200)
+                    self.assertEqual(response.read().decode(), application_text())
+                connection.request("GET", "/missing")
+                response = connection.getresponse()
+                self.assertEqual(response.status, 404)
+                response.read()
             finally:
+                connection.close()
                 server.shutdown()
                 thread.join(timeout=3)
 
